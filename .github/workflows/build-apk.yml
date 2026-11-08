@@ -31,10 +31,10 @@ jobs:
       run: chmod +x android/gradlew
 
     - name: Build APK
-    run: cd android && ./gradlew assembleRelease
+      run: cd android && ./gradlew assembleRelease
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: sidebar-app
-     path: android/app/build/outputs/apk/release/app-release.apk
+        path: android/app/build/outputs/apk/release/app-release.apk
