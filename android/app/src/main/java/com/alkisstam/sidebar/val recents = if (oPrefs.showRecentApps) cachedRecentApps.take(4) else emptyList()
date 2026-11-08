@@ -493,10 +493,10 @@ class SidebarOverlayService : Service() {
         val screenHeight = resources.displayMetrics.heightPixels
         // Tools(56)+divider(1)+padding(12)+6 cells×68dp
         val maxPanelHeight = dp(477)
-        val recents = if (oPrefs.showRecentApps) cachedRecentApps.take(4) else emptyList()
+      val recents = emptyList<String>() // Desactivado para modo lanzador puro
         val totalAppCount = recents.size + pkgs.size
         val appH = if (totalAppCount == 0) dp(60) else totalAppCount * dp(68)
-        val panelHeight = (dp(57) + appH).coerceAtMost(maxPanelHeight).coerceAtMost(screenHeight)
+  val panelHeight = (dp(10) + appH).coerceAtMost(maxPanelHeight).coerceAtMost(screenHeight)
         val handleCenterY = (prefs.position * screenHeight).toInt()
         val panelY = (handleCenterY - panelHeight / 2).coerceIn(0, maxOf(0, screenHeight - panelHeight))
 
@@ -529,39 +529,39 @@ class SidebarOverlayService : Service() {
             outlineProvider = ViewOutlineProvider.BACKGROUND
         }
 
-        val toolsBtn = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(56))
-            isClickable = true
-            isFocusable = true
-        }
-        toolsBtn.addView(TextView(this).apply {
-            text = ""
-            textSize = 20f
-            gravity = Gravity.CENTER
-            setTextColor(iconColor)
-            typeface = iconTypeface
-        })
-        toolsBtn.addView(TextView(this).apply {
-            text = "Tools"
-            textSize = 9f
-            gravity = Gravity.CENTER
-            setTextColor(iconColor)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { topMargin = dp(2) }
-        })
-        toolsBtn.setOnClickListener { toggleControlsPanel(prefs, oPrefs, effectiveSide, panelY) }
-        root.addView(toolsBtn)
-
-
-        root.addView(View(this).apply {
-            setBackgroundColor(Color.argb(40, 128, 128, 128))
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, 1
-            ).apply { marginStart = dp(8); marginEnd = dp(8) }
-        })
+  //      val toolsBtn = LinearLayout(this).apply {
+    //        orientation = LinearLayout.VERTICAL
+      //      gravity = Gravity.CENTER
+  //          layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(56))
+    //        isClickable = true
+      //      isFocusable = true
+  //      }
+    //    toolsBtn.addView(TextView(this).apply {
+    //        text = ""
+     //       textSize = 20f
+      //      gravity = Gravity.CENTER
+       //     setTextColor(iconColor)
+     //       typeface = iconTypeface
+    //    })
+    //    toolsBtn.addView(TextView(this).apply {
+    //        text = "Tools"
+    //        textSize = 9f
+   //         gravity = Gravity.CENTER
+   //         setTextColor(iconColor)
+   //         layoutParams = LinearLayout.LayoutParams(
+   //             LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+   //         ).apply { topMargin = dp(2) }
+   //     })
+   //     toolsBtn.setOnClickListener { toggleControlsPanel(prefs, oPrefs, effectiveSide, panelY) }
+    //    root.addView(toolsBtn)
+//
+//
+  //      root.addView(View(this).apply {
+    //        setBackgroundColor(Color.argb(40, 128, 128, 128))
+      //      layoutParams = LinearLayout.LayoutParams(
+        //        LinearLayout.LayoutParams.MATCH_PARENT, 1
+     //       ).apply { marginStart = dp(8); marginEnd = dp(8) }
+    //    })
 
         val scroll = ScrollView(this).apply { isVerticalScrollBarEnabled = false }
         val container = LinearLayout(this).apply {
