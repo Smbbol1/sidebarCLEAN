@@ -1,5 +1,4 @@
 package com.alkisstam.sidebar
-
 import android.app.AppOpsManager
 import rikka.shizuku.Shizuku
 import android.app.NotificationManager
@@ -294,32 +293,7 @@ class SidebarModule(private val reactContext: ReactApplicationContext) :
         }
         promise.resolve(mode == AppOpsManager.MODE_ALLOWED)
     }
-
-    @ReactMethod
-    fun hasShizukuPermission(promise: Promise) {
-        try {
-            val running = Shizuku.pingBinder()
-            val granted = running && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
-            promise.resolve(if (!running) "not_running" else if (granted) "granted" else "denied")
-        } catch (e: Exception) {
-            promise.resolve("not_running")
-        }
-    }
-
-    @ReactMethod
-    fun requestShizukuPermission(promise: Promise) {
-        try {
-            if (!Shizuku.pingBinder()) { promise.resolve("not_running"); return }
-            if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                promise.resolve("granted"); return
-            }
-            Shizuku.requestPermission(1002)
-            promise.resolve("requested")
-        } catch (e: Exception) {
-            promise.resolve("error")
-        }
-    }
-
+   
     @ReactMethod
     fun requestUsageAccessPermission(promise: Promise) {
         val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
