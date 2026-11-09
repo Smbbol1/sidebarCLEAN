@@ -328,14 +328,9 @@ class SidebarOverlayService : Service() {
         val effectiveSide = if (prefs.side == "both") lastActiveSide else prefs.side
 
         val screenHeight = resources.displayMetrics.heightPixels
-        val maxPanelHeight = dp(477)
-        val recents = emptyList<String>() // Desactivado
-        val totalAppCount = recents.size + pkgs.size
-        val appH = if (totalAppCount == 0) dp(60) else totalAppCount * dp(68)
-        val panelHeight = (dp(10) + appH).coerceAtMost(maxPanelHeight).coerceAtMost(screenHeight)
-        val handleCenterY = (prefs.position * screenHeight).toInt()
-        val panelY = (handleCenterY - panelHeight / 2).coerceIn(0, maxOf(0, screenHeight - panelHeight))
-
+        val panelHeight = screenHeight // Ocupa toda la pantalla
+        val panelY = 0 // Empieza desde arriba
+        
         val overlay = View(this).apply {
             setBackgroundColor(Color.TRANSPARENT)
             setOnClickListener { hidePanel() }
@@ -369,9 +364,10 @@ class SidebarOverlayService : Service() {
         }
 
         val scroll = ScrollView(this).apply { isVerticalScrollBarEnabled = false }
-        val container = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(dp(4), dp(4), dp(4), dp(8))
+        val container = GridLayout(this).apply {
+            columnCount = 2 // 2 Columnas
+            alignmentMode = GridLayout.ALIGN_BOUNDS
+            setPadding(dp(8), dp(8), dp(8), dp(8))
         }
 
         fun loadCell(pkg: String): View? {
@@ -397,19 +393,26 @@ class SidebarOverlayService : Service() {
             }
         }
 
-        if (pkgs.isEmpty()) {
+               if (pkgs.isEmpty()) {
             container.addView(TextView(this).apply {
                 text = "No\nfavs"
                 setTextColor(emptyColor)
                 textSize = 11f
                 gravity = Gravity.CENTER
                 setPadding(dp(4), dp(16), dp(4), dp(16))
+                layoutParams = GridLayout.LayoutParams().apply {
+                    columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 2f) // Ocupa las 2 columnas
+                }
             })
         } else {
             for (pkg in pkgs) {
                 loadCell(pkg)?.let { cell ->
-                    cell.layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                    val params = GridLayout.LayoutParams()
+                    params.width = 0 // Se ajusta automáticamente
+                    params.height = GridLayout.LayoutParams.WRAP_CONTENT
+                    params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f) // 1 columna de ancho
+                    params.setMargins(dp(4), dp(4), dp(4), dp(4))
+                    cell.layoutParams = params
                     container.addView(cell)
                 }
             }
@@ -421,7 +424,7 @@ class SidebarOverlayService : Service() {
         val panelGravity = if (effectiveSide == "left") Gravity.START or Gravity.TOP
                            else Gravity.END or Gravity.TOP
         wm.addView(root, WindowManager.LayoutParams(
-            dp(64), panelHeight,
+            dp(140), panelHeight,
             overlayType(),
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
@@ -433,7 +436,7 @@ class SidebarOverlayService : Service() {
         handleView?.visibility = View.INVISIBLE
         handleViewAlt?.visibility = View.INVISIBLE
 
-        val slideFrom = if (effectiveSide == "left") -dp(64).toFloat() else dp(64).toFloat()
+       val slideFrom = if (effectiveSide == "left") -dp(140).toFloat() else dp(140).toFloat()
         root.translationX = slideFrom
         root.alpha = 0f
         root.scaleX = 0.92f
@@ -462,7 +465,7 @@ class SidebarOverlayService : Service() {
         val handle = handleView
         val handleAlt = handleViewAlt
 
-        val slideTo = if (effectiveSide == "left") -dp(64).toFloat() else dp(64).toFloat()
+        val slideTo = if (effectiveSide == "left") -dp(140).toFloat() else dp(140).toFloat()
         panel.animate().withLayer()
             .translationX(slideTo).alpha(0f)
             .setDuration(160).setInterpolator(AccelerateInterpolator(2.2f))
@@ -742,7 +745,7 @@ class SidebarOverlayService : Service() {
         }
         cell.addView(ImageView(this).apply {
             setImageDrawable(icon)
-            val size = dp(48)
+            val size = dp(64)
             layoutParams = LinearLayout.LayoutParams(size, size)
             scaleType = ImageView.ScaleType.FIT_CENTER
         })
