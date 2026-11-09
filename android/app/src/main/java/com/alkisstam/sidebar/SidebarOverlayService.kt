@@ -274,23 +274,31 @@ class SidebarOverlayService : Service() {
         }
     }
 
-    private fun installSwipeListener(handle: View, sensitivityDp: Int = 16, triggerSide: String = "right") {
+        private fun installSwipeListener(handle: View, sensitivityDp: Int = 16, triggerSide: String = "right") {
         var downX = 0f
         var downY = 0f
+        var isSwipe = false
         handle.setOnTouchListener { _, event ->
             when (event.action) {
-                MotionEvent.ACTION_DOWN -> { downX = event.rawX; downY = event.rawY; true }
+                MotionEvent.ACTION_DOWN -> {
+                    downX = event.rawX
+                    downY = event.rawY
+                    isSwipe = false
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (Math.abs(event.rawX - downX) > dp(10) || Math.abs(event.rawY - downY) > dp(10)) {
+                        isSwipe = true
+                    }
+                    true
+                }
                 MotionEvent.ACTION_UP -> {
-                    val dx = event.rawX - downX
-                    val adx = Math.abs(dx)
-                    val threshold = dp(sensitivityDp)
-                    if (adx >= threshold) {
+                    if (!isSwipe) {
                         lastActiveSide = triggerSide
                         toggle()
                     }
                     true
                 }
-                MotionEvent.ACTION_MOVE -> true
                 else -> false
             }
         }
@@ -364,10 +372,10 @@ class SidebarOverlayService : Service() {
         }
 
         val scroll = ScrollView(this).apply { isVerticalScrollBarEnabled = false }
-        val container = GridLayout(this).apply {
-            columnCount = 2 // 2 Columnas
+               val container = GridLayout(this).apply {
+            columnCount = 3 // 3 Columnas
             alignmentMode = GridLayout.ALIGN_BOUNDS
-            setPadding(dp(8), dp(8), dp(8), dp(8))
+            setPadding(dp(2), dp(2), dp(2), dp(2))
         }
 
         fun loadCell(pkg: String): View? {
@@ -404,14 +412,14 @@ class SidebarOverlayService : Service() {
                     columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 2f) // Ocupa las 2 columnas
                 }
             })
-        } else {
+                } else {
             for (pkg in pkgs) {
                 loadCell(pkg)?.let { cell ->
                     val params = GridLayout.LayoutParams()
-                    params.width = 0 // Se ajusta automáticamente
+                    params.width = 0
                     params.height = GridLayout.LayoutParams.WRAP_CONTENT
-                    params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f) // 1 columna de ancho
-                    params.setMargins(dp(4), dp(4), dp(4), dp(4))
+                    params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                    params.setMargins(dp(2), dp(2), dp(2), dp(2))
                     cell.layoutParams = params
                     container.addView(cell)
                 }
@@ -424,7 +432,7 @@ class SidebarOverlayService : Service() {
         val panelGravity = if (effectiveSide == "left") Gravity.START or Gravity.TOP
                            else Gravity.END or Gravity.TOP
         wm.addView(root, WindowManager.LayoutParams(
-            dp(140), panelHeight,
+            dp(200), panelHeight,
             overlayType(),
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
@@ -436,7 +444,7 @@ class SidebarOverlayService : Service() {
         handleView?.visibility = View.INVISIBLE
         handleViewAlt?.visibility = View.INVISIBLE
 
-       val slideFrom = if (effectiveSide == "left") -dp(140).toFloat() else dp(140).toFloat()
+        val slideFrom = if (effectiveSide == "left") -dp(200).toFloat() else dp(200).toFloat()
         root.translationX = slideFrom
         root.alpha = 0f
         root.scaleX = 0.92f
@@ -465,7 +473,7 @@ class SidebarOverlayService : Service() {
         val handle = handleView
         val handleAlt = handleViewAlt
 
-        val slideTo = if (effectiveSide == "left") -dp(140).toFloat() else dp(140).toFloat()
+        val slideTo = if (effectiveSide == "left") -dp(200).toFloat() else dp(200).toFloat()
         panel.animate().withLayer()
             .translationX(slideTo).alpha(0f)
             .setDuration(160).setInterpolator(AccelerateInterpolator(2.2f))
@@ -716,10 +724,10 @@ class SidebarOverlayService : Service() {
         isHighlighted: Boolean = false,
         onClick: () -> Unit = { launch(pkg) }
     ): View {
-        val cell = LinearLayout(this).apply {
+           val cell = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(dp(4), dp(10), dp(4), dp(10))
+            setPadding(dp(2), dp(6), dp(2), dp(6))
             isClickable = true
             isFocusable = true
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
@@ -745,7 +753,7 @@ class SidebarOverlayService : Service() {
         }
         cell.addView(ImageView(this).apply {
             setImageDrawable(icon)
-            val size = dp(64)
+            val size = dp(48)
             layoutParams = LinearLayout.LayoutParams(size, size)
             scaleType = ImageView.ScaleType.FIT_CENTER
         })
