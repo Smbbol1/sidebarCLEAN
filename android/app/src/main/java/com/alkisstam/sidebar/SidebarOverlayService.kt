@@ -204,7 +204,7 @@ class SidebarOverlayService : Service() {
     private fun overlayPrefs(): OverlayPrefs {
         val p = getSharedPreferences(Prefs.FILE, MODE_PRIVATE)
         return OverlayPrefs(
-            p.getBoolean(Prefs.AUTO_HIDE_FULLSCREEN, false),
+                  false, // Auto-hide desactivado permanentemente
             p.getBoolean(Prefs.SHOW_LABELS, true),
             p.getBoolean(Prefs.VIBRATION, true),
             p.getInt(Prefs.SWIPE_SENSITIVITY, 16),
@@ -219,12 +219,13 @@ class SidebarOverlayService : Service() {
         val screenHeight = resources.displayMetrics.heightPixels
         val yPos = (prefs.position * screenHeight - pillHeight / 2).toInt()
             .coerceIn(0, screenHeight - pillHeight)
-        return WindowManager.LayoutParams(
+                return WindowManager.LayoutParams(
             maxOf(dp(prefs.width), dp(24)), pillHeight,
             overlayType(),
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = if (side == "left") Gravity.START or Gravity.TOP
@@ -910,19 +911,7 @@ class SidebarOverlayService : Service() {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private fun isSystemFullscreen(): Boolean = try {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val insets = wm.currentWindowMetrics.windowInsets
-                .getInsets(android.view.WindowInsets.Type.systemBars())
-            insets.top == 0 && insets.bottom == 0
-        } else {
-            val real = resources.displayMetrics.heightPixels
-            val app = DisplayMetrics().also {
-                @Suppress("DEPRECATION") wm.defaultDisplay.getMetrics(it)
-            }
-            app.heightPixels >= real
-        }
-    } catch (_: Exception) { false }
+      private fun isSystemFullscreen(): Boolean = false
 
     private fun createChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
